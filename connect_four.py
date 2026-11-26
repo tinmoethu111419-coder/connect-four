@@ -27,6 +27,7 @@ class ConnectFour:
         self.turn = 'O'
         self.winner = None
         self.moves = 0
+        self.history = []
 
     def legal_columns(self):
         return [x for x in range(COLS) if self.board[0][x] == '.']
@@ -37,6 +38,7 @@ class ConnectFour:
             return None
         for row in range(ROWS - 1, -1, -1):
             if self.board[row][col] == '.':
+                self.history.append((col, row, self.turn))
                 self.board[row][col] = self.turn
                 placed = (col, row)
                 self.moves += 1
@@ -64,6 +66,16 @@ class ConnectFour:
                 return True
         return False
 
+    def undo(self):
+        if not self.history:
+            return False
+        col, row, player = self.history.pop()
+        self.board[row][col] = '.'
+        self.turn = player
+        self.moves -= 1
+        self.winner = None
+        return True
+    
     def render(self):
         lines = ['=== CONNECT FOUR / 四目並べ ===', ' ' + ' '.join(str(i + 1) for i in range(COLS))]
         lines += ['|' + ' '.join(row) + '|' for row in self.board]
@@ -82,6 +94,9 @@ def main():
     while True:
         print('\n' + game.render())
         command = input('> ').strip().lower()
+        if command == 'u':
+            game.undo()
+            continue
         if command == 'q':
             break
         if command == 'r':
